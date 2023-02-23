@@ -88,7 +88,7 @@ return [
 ## Future?
 
 - [ ] Add unit tests from PR
-- [ ] Add APNG support with auto-prefixing of `APNG:`
+- [x] Add APNG support with auto-prefixing of `APNG:`
 - [ ] Get approved to be merged into Kirby Core - tracked in [PR #4275](https://github.com/getkirby/kirby/pull/4275)
 
 ## Credits
