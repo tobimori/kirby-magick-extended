@@ -9,6 +9,18 @@ use Kirby\Image\Darkroom\ImageMagick;
 class ImageMagickExtended extends ImageMagick
 {
   /**
+   * Keep animated gifs & animated pngs
+   */
+  protected function coalesce(string $file, array $options): string|null
+  {
+    if (F::extension($file) === 'gif' || $options['apng'] && F::mime($file) === 'image/png') {
+      return '-coalesce';
+    }
+
+    return null;
+  }
+
+  /**
    * Creates the convert command with the right path to the binary file
    */
   protected function convert(string $file, array $options): string
@@ -27,9 +39,22 @@ class ImageMagickExtended extends ImageMagick
     }
 
     // frame option to allow selecting layers for multi-layer or frames for animated images
-    $fileOptions = '';
+    $fileSuffix = '';
+    $filePrefix = '';
     $frame = $options['frame'];
-    $maxFrames = $this->frameCount($file, $options);
+
+    // assume image is apng, if apng option is set and file is png
+    if ($options['apng'] && F::mime($file) === 'image/png') {
+      $filePrefix = 'apng:';
+    }
+
+    $maxFrames = $this->frameCount($filePrefix . $file, $options);
+
+    if ($maxFrames === 1) {
+      $filePrefix = ''; // remove apng prefix if image is not animated
+    }
+
+    // get frame argument
     if ($frame !== null) {
       // check whether frame is in bounds
       if ($frame < 0) {
@@ -40,18 +65,18 @@ class ImageMagickExtended extends ImageMagick
         throw new Exception('Frame option must be smaller than the number of frames in the image');
       }
 
-      $fileOptions = "[{$frame}]";
+      $fileSuffix = "[{$frame}]";
     } elseif ($maxFrames > 1) {
       // if frame is not set and target format doesn't support multi-layer images, select first frame
       $targetFormat = $options['format'] ?? F::extension($file);
-      $multiLayerFormats = ['gif', 'avif', 'webp'];
+      $multiLayerFormats = ['gif', 'avif', 'webp', $options['apng'] ? 'png' : null];
       if (!in_array($targetFormat, $multiLayerFormats)) {
-        $fileOptions = '[0]';
+        $fileSuffix = '[0]';
       }
     }
 
     // append input file
-    return $command . ' ' . escapeshellarg($file . $fileOptions);
+    return $command . ' ' . escapeshellarg($filePrefix . $file . $fileSuffix);
   }
 
   /**
@@ -79,6 +104,7 @@ class ImageMagickExtended extends ImageMagick
       'identifyBin' => 'identify',
       'interlace'   => false,
       'frame'       => null,
+      'apng'        => true,
     ];
   }
 }
