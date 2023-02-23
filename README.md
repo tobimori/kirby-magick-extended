@@ -6,7 +6,7 @@ This plugin extends Kirby's built-in ImageMagick driver with features for workin
 
 ## The issue
 
-When converting an animated image to another format, ImageMagick converts each frame individually and outputs them as separate files with suffixes. This is not ideal for Kirby, as it expects the output to be a single image file. This plugin solves the issue by checking each image upfront converting for its frame count, and will then specify to convert the first frame only. It also adds a new option `frame` to manually specify the frame index.
+When converting an animated image to another format, ImageMagick converts each frame individually and outputs them as separate files with suffixes. This is not ideal for Kirby, as it expects the output to be a single image file. This plugin solves the issue by checking each image upfront converting for its frame count, and will then specify to convert the first frame only if the target format does not support multiple frames. It also adds a new option `frame` to manually specify the frame index.
 
 The detection of available image frames requires the `identify` command to be available, which can be seen as breaking change, hence the creation of this plugin as it's unlikely to be merged in Kirby Core for fixing a variety of very niche edge case scenarios.
 
