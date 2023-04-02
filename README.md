@@ -36,7 +36,7 @@ composer require tobimori/kirby-magick-extended
 // site/config/config.php
 
 return [
-  'thumbs.driver' => 'magick-extended',
+  'thumbs.driver' => 'im-extended',
 ];
 ```
 
